@@ -3,19 +3,19 @@ version: "3.8"
 services:
   backend:
     build:
-      context: ./backend
-    container_name: backend
+      context: ./server
+    container_name: server
     ports:
       - "5000:5000"
     env_file:
-      - ./backend/.env
+      - ./server/.env
     networks:
       - mern-net
 
   frontend:
     build:
-      context: ./frontend
-    container_name: frontend
+      context: ./client
+    container_name: client
     ports:
       - "3000:80"
     depends_on:
