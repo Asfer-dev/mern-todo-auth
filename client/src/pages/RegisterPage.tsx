@@ -1,20 +1,35 @@
-import { useState } from "react";
+import { useState, FormEvent, ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApi } from "../hooks/useApi";
 import Input from "../components/Input";
 import PrimaryButton from "../components/Button";
 
+type FormData = {
+  name: string;
+  email: string;
+  password: string;
+};
+
+type ErrorState = {
+  name?: string;
+  email?: string;
+  password?: string;
+  general?: string;
+};
+
 const RegisterPage = () => {
   const { apiCall } = useApi();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     password: "",
   });
-  const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false); // local state
+
+  const [errors, setErrors] = useState<ErrorState>({});
+  const [success, setSuccess] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleSubmit = async () => {
     setErrors({});
@@ -40,18 +55,25 @@ const RegisterPage = () => {
 
       setSuccess("Account created successfully! Redirecting to login...");
       setTimeout(() => navigate("/login"), 2000);
-    } catch (error) {
-      setErrors({ general: error.message || "Registration failed" });
+    } catch (error: any) {
+      setErrors({ general: error?.message || "Registration failed" });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleChange = (
+    field: keyof FormData,
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
+    setFormData({ ...formData, [field]: e.target.value });
   };
 
   return (
     <div className="min-h-screen bg-yellow-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-8 w-full max-w-md">
         <form
-          onSubmit={(e) => {
+          onSubmit={(e: FormEvent<HTMLFormElement>) => {
             e.preventDefault();
             handleSubmit();
           }}
@@ -68,8 +90,8 @@ const RegisterPage = () => {
               label="Name"
               type="text"
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChange("name", e)
               }
               placeholder="Enter your full name"
               error={errors.name}
@@ -80,8 +102,8 @@ const RegisterPage = () => {
               label="Email"
               type="email"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChange("email", e)
               }
               placeholder="Enter your email"
               error={errors.email}
@@ -92,8 +114,8 @@ const RegisterPage = () => {
               label="Password"
               type="password"
               value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChange("password", e)
               }
               placeholder="Enter your password (min 6 characters)"
               error={errors.password}

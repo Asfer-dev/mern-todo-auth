@@ -1,8 +1,12 @@
+import { useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useEffect } from "react";
 
-const PublicRoute = ({ children }) => {
+type PublicRouteProps = {
+  children: ReactNode;
+};
+
+const PublicRoute = ({ children }: PublicRouteProps) => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -16,7 +20,7 @@ const PublicRoute = ({ children }) => {
     return null;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export default PublicRoute;

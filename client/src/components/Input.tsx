@@ -1,4 +1,12 @@
-const Input = ({ label, error, className = "", ...props }) => {
+import { InputHTMLAttributes } from "react";
+
+type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+  label?: string;
+  error?: string;
+  className?: string;
+};
+
+const Input = ({ label, error, className = "", ...props }: InputProps) => {
   return (
     <div className="space-y-2">
       {label && (
@@ -8,7 +16,7 @@ const Input = ({ label, error, className = "", ...props }) => {
       )}
       <input
         className={`w-full px-4 py-3 bg-white border-0 rounded-lg shadow-sm focus:shadow-md focus:ring-2 focus:ring-yellow-200 transition-all duration-200 outline-none
-                  ${error ? "border-red-500" : ""} ${className}`}
+          ${error ? "border-red-500" : ""} ${className}`}
         {...props}
       />
       {error && <p className="text-red-500 text-sm">{error}</p>}

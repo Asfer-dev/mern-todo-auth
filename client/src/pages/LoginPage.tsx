@@ -1,17 +1,38 @@
-import { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useApi } from "../hooks/useApi";
 import Input from "../components/Input";
 import PrimaryButton from "../components/Button";
 
+type FormData = {
+  email: string;
+  password: string;
+};
+
+type ErrorState = {
+  email?: string;
+  password?: string;
+  general?: string;
+};
+
 const LoginPage = () => {
   const { login } = useAuth();
   const { apiCall } = useApi();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+
+  const [formData, setFormData] = useState<FormData>({
+    email: "",
+    password: "",
+  });
+
+  const [errors, setErrors] = useState<ErrorState>({});
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleChange =
+    (field: keyof FormData) => (e: ChangeEvent<HTMLInputElement>) => {
+      setFormData({ ...formData, [field]: e.target.value });
+    };
 
   const handleSubmit = async () => {
     setErrors({});
@@ -31,7 +52,7 @@ const LoginPage = () => {
 
       login(data.token);
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       setErrors({ general: error.message || "Login failed" });
     } finally {
       setLoading(false);
@@ -41,7 +62,7 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-yellow-50 flex items-center justify-center p-4">
       <form
-        onSubmit={(e) => {
+        onSubmit={(e: FormEvent<HTMLFormElement>) => {
           e.preventDefault();
           handleSubmit();
         }}
@@ -57,38 +78,34 @@ const LoginPage = () => {
         <div className="space-y-6">
           {/* Email Input */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-600">
+            {/* <label className="block text-sm font-medium text-gray-600">
               Email
-            </label>
+            </label> */}
             <Input
+              label={"Email"}
               type="email"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              onChange={handleChange("email")}
               placeholder="Enter your email"
+              error={errors.email}
+              disabled={loading}
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm">{errors.email}</p>
-            )}
           </div>
 
           {/* Password Input */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-600">
+            {/* <label className="block text-sm font-medium text-gray-600">
               Password
-            </label>
+            </label> */}
             <Input
+              label={"Password"}
               type="password"
               value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
+              onChange={handleChange("password")}
               placeholder="Enter your password"
+              error={errors.password}
+              disabled={loading}
             />
-            {errors.password && (
-              <p className="text-red-500 text-sm">{errors.password}</p>
-            )}
           </div>
 
           {/* General Error */}
@@ -110,6 +127,7 @@ const LoginPage = () => {
             type="button"
             onClick={() => navigate("/register")}
             className="text-gray-600 hover:text-gray-800 font-medium transition-colors"
+            disabled={loading}
           >
             {"Don't have an account? "}
             <span className="text-yellow-600 hover:text-yellow-700">

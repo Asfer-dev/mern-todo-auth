@@ -3,14 +3,20 @@ import { useAuth } from "../context/AuthContext";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
+type ApiOptions = RequestInit & {
+  // Optional custom headers; merged with default Content-Type/Auth headers
+  headers?: Record<string, string>;
+};
+
 export const useApi = () => {
   const { token } = useAuth();
 
   const apiCall = useCallback(
-    async (endpoint, options = {}) => {
-      const headers = {
+    async <T = any>(endpoint: string, options: ApiOptions = {}): Promise<T> => {
+      const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers ? (options.headers as Record<string, string>) : {}),
       };
 
       try {
@@ -28,8 +34,8 @@ export const useApi = () => {
           throw new Error(errorBody?.error || `HTTP ${response.status}`);
         }
 
-        return isJson ? await response.json() : null;
-      } catch (error) {
+        return isJson ? await response.json() : (null as T);
+      } catch (error: any) {
         console.error("API Error:", error);
         throw error;
       }

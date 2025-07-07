@@ -1,10 +1,27 @@
 import { Calendar, Check, Edit3, Star, Trash2 } from "lucide-react";
+import { ReactNode } from "react";
 
-const TodoCard = ({ todo, onToggle, onEdit, onDelete }) => {
+type Todo = {
+  _id: string;
+  text: string;
+  completed: boolean;
+  priority?: "high" | "medium" | "low" | string;
+  dueDate?: string;
+  tags?: string[];
+};
+
+type TodoCardProps = {
+  todo: Todo;
+  onToggle: (id: string) => void;
+  onEdit: (todo: Todo) => void;
+  onDelete: (id: string) => void;
+};
+
+const TodoCard = ({ todo, onToggle, onEdit, onDelete }: TodoCardProps) => {
   const isOverdue =
     todo.dueDate && new Date(todo.dueDate) < new Date() && !todo.completed;
 
-  const getPriorityColor = (priority) => {
+  const getPriorityColor = (priority: string): string => {
     switch (priority) {
       case "high":
         return "bg-red-100 text-red-700";
@@ -17,7 +34,7 @@ const TodoCard = ({ todo, onToggle, onEdit, onDelete }) => {
     }
   };
 
-  const getBorderColor = () => {
+  const getBorderColor = (): string => {
     if (todo.completed) return "border-l-green-400";
     if (isOverdue) return "border-l-red-400";
 

@@ -1,8 +1,21 @@
-import { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import Input from "./Input";
 import PrimaryButton from "./Button";
 
-const TodoForm = ({ todo, onSubmit, onCancel }) => {
+export type TodoFormData = {
+  text: string;
+  dueDate?: string | null;
+  priority: "low" | "medium" | "high";
+  tags?: string[];
+};
+
+type TodoFormProps = {
+  todo: TodoFormData | null;
+  onSubmit: (data: TodoFormData) => void | Promise<void>;
+  onCancel: () => void;
+};
+
+const TodoForm = ({ todo, onSubmit, onCancel }: TodoFormProps) => {
   const [formData, setFormData] = useState({
     text: todo?.text || "",
     dueDate: todo?.dueDate
@@ -12,11 +25,15 @@ const TodoForm = ({ todo, onSubmit, onCancel }) => {
     tags: todo?.tags?.join(", ") || "",
   });
 
+  const handleChange = (field: keyof typeof formData, value: string): void => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
   const handleSubmit = () => {
     const tags = formData.tags
       .split(",")
       .map((tag) => tag.trim())
-      .filter((tag) => tag);
+      .filter(Boolean);
 
     onSubmit({
       ...formData,
@@ -27,7 +44,7 @@ const TodoForm = ({ todo, onSubmit, onCancel }) => {
 
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={(e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         handleSubmit();
       }}
@@ -39,7 +56,9 @@ const TodoForm = ({ todo, onSubmit, onCancel }) => {
         <Input
           type="text"
           value={formData.text}
-          onChange={(e) => setFormData({ ...formData, text: e.target.value })}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            handleChange("text", e.target.value)
+          }
           placeholder="What needs to be done?"
           required
           className="w-full px-4 py-3 bg-white border-0 rounded-lg shadow-sm focus:shadow-md focus:ring-2 focus:ring-yellow-200 transition-all duration-200 outline-none"
@@ -54,8 +73,8 @@ const TodoForm = ({ todo, onSubmit, onCancel }) => {
         <Input
           type="date"
           value={formData.dueDate}
-          onChange={(e) =>
-            setFormData({ ...formData, dueDate: e.target.value })
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            handleChange("dueDate", e.target.value)
           }
         />
       </div>
@@ -67,8 +86,8 @@ const TodoForm = ({ todo, onSubmit, onCancel }) => {
         </label>
         <select
           value={formData.priority}
-          onChange={(e) =>
-            setFormData({ ...formData, priority: e.target.value })
+          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+            handleChange("priority", e.target.value)
           }
           className="w-full px-4 py-3 bg-white border-0 rounded-lg shadow-sm focus:shadow-md focus:ring-2 focus:ring-yellow-200 transition-all duration-200 outline-none"
         >
@@ -84,7 +103,9 @@ const TodoForm = ({ todo, onSubmit, onCancel }) => {
         <Input
           type="text"
           value={formData.tags}
-          onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            handleChange("tags", e.target.value)
+          }
           placeholder="work, urgent, home (comma separated)"
         />
       </div>

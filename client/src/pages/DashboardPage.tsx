@@ -1,43 +1,58 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  ChangeEvent,
+} from "react";
 import { useAuth } from "../context/AuthContext";
 import { useApi } from "../hooks/useApi";
 import TodoCard from "../components/TodoCard";
 import TodoForm from "../components/TodoForm";
 import Modal from "../components/Modal";
-import GradientButton from "../components/Button";
-import {
-  LogOut,
-  Plus,
-  Search,
-  Calendar,
-  Check,
-  AlertCircle,
-  Clock,
-} from "lucide-react";
+import { LogOut, Plus, Search } from "lucide-react";
 import PrimaryButton from "../components/Button";
+
+type Todo = {
+  _id: string;
+  text: string;
+  completed: boolean;
+  priority: string;
+  tags?: string[];
+  dueDate?: string;
+  // Add any other fields returned from your backend
+};
+
+type TodoFormData = {
+  text: string;
+  priority: string;
+  dueDate?: string;
+  tags?: string[];
+  completed?: boolean;
+};
 
 const Dashboard = () => {
   const { logout } = useAuth();
   const { apiCall } = useApi();
 
-  const [todos, setTodos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [showModal, setShowModal] = useState(false);
-  const [editingTodo, setEditingTodo] = useState(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterPriority, setFilterPriority] = useState("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [filterPriority, setFilterPriority] = useState<string>("");
 
   // Fetch todos from backend
   const fetchTodos = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiCall("/todos");
+      const data: Todo[] = await apiCall("/todos");
       setTodos(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to fetch todos:", err);
       setError("Failed to load tasks. Please try again later.");
     } finally {
@@ -49,7 +64,7 @@ const Dashboard = () => {
     fetchTodos();
   }, [fetchTodos]);
 
-  const openModal = (todo = null) => {
+  const openModal = (todo: Todo | null = null) => {
     setEditingTodo(todo);
     setShowModal(true);
   };
@@ -59,8 +74,8 @@ const Dashboard = () => {
     setShowModal(false);
   };
 
-  const handleCreateOrUpdate = async (data) => {
-    const method = editingTodo ? "PUT" : "POST";
+  const handleCreateOrUpdate = async (data: TodoFormData): Promise<void> => {
+    const method: "POST" | "PUT" = editingTodo ? "PUT" : "POST";
     const endpoint = editingTodo ? `/todos/${editingTodo._id}` : "/todos";
 
     try {
@@ -75,7 +90,7 @@ const Dashboard = () => {
     }
   };
 
-  const handleToggleTodo = async (id) => {
+  const handleToggleTodo = async (id: string) => {
     try {
       await apiCall(`/todos/${id}/toggle`, { method: "PATCH" });
       fetchTodos();
@@ -84,7 +99,7 @@ const Dashboard = () => {
     }
   };
 
-  const handleDeleteTodo = async (id) => {
+  const handleDeleteTodo = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this task?")) {
       try {
         await apiCall(`/todos/${id}`, { method: "DELETE" });
@@ -127,7 +142,6 @@ const Dashboard = () => {
     ).length,
   };
 
-  // Loading spinner
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50">
@@ -136,7 +150,6 @@ const Dashboard = () => {
     );
   }
 
-  // Error message
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50">
@@ -176,29 +189,7 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {/* Stats */}
-        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <StatCard
-            title="Total Tasks"
-            value={stats.total}
-            icon={<Clock />}
-            color="bg-gray-500"
-          />
-          <StatCard
-            title="Completed"
-            value={stats.completed}
-            icon={<Check />}
-            color="bg-green-500"
-          />
-          <StatCard
-            title="Overdue"
-            value={stats.overdue}
-            icon={<AlertCircle />}
-            color="bg-red-500"
-          />
-        </div> */}
-
-        {/* Search and Filter */}
+        {/* Search & Filter */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="relative flex-1">
             <Search
@@ -209,13 +200,17 @@ const Dashboard = () => {
               type="text"
               placeholder="Search notes..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setSearchTerm(e.target.value)
+              }
               className="w-full pl-12 pr-4 py-3 bg-white border-0 rounded-lg shadow-sm focus:shadow-md focus:ring-2 focus:ring-yellow-200 transition-all duration-200 outline-none"
             />
           </div>
           <select
             value={filterPriority}
-            onChange={(e) => setFilterPriority(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              setFilterPriority(e.target.value)
+            }
             className="px-4 py-3 bg-white border-0 rounded-lg shadow-sm focus:shadow-md focus:ring-2 focus:ring-yellow-200 transition-all duration-200 outline-none"
           >
             <option value="">All</option>
@@ -227,16 +222,14 @@ const Dashboard = () => {
 
         {/* Action Bar */}
         <div className="flex justify-between items-center mb-8">
-          <div>
-            {stats.completed > 0 && (
-              <button
-                onClick={handleDeleteCompleted}
-                className="text-gray-400 hover:text-gray-600 text-sm transition-colors"
-              >
-                Clear completed
-              </button>
-            )}
-          </div>
+          {stats.completed > 0 && (
+            <button
+              onClick={handleDeleteCompleted}
+              className="text-gray-400 hover:text-gray-600 text-sm transition-colors"
+            >
+              Clear completed
+            </button>
+          )}
           <PrimaryButton
             onClick={() => openModal()}
             className="flex items-center space-x-2 px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-lg transition-colors shadow-sm hover:shadow-md font-medium"
@@ -298,21 +291,26 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-// StatCard subcomponent
-const StatCard = ({ title, value, icon, color }) => {
-  return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
-          <p className="text-2xl font-bold text-gray-800">{value}</p>
-        </div>
-        <div
-          className={`w-12 h-12 rounded-lg bg-gradient-to-r ${color} flex items-center justify-center text-white shadow-sm`}
-        >
-          {icon}
-        </div>
+// StatCard component with type-safe props
+type StatCardProps = {
+  title: string;
+  value: number;
+  icon: React.ReactNode;
+  color: string;
+};
+
+const StatCard = ({ title, value, icon, color }: StatCardProps) => (
+  <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
+        <p className="text-2xl font-bold text-gray-800">{value}</p>
+      </div>
+      <div
+        className={`w-12 h-12 rounded-lg bg-gradient-to-r ${color} flex items-center justify-center text-white shadow-sm`}
+      >
+        {icon}
       </div>
     </div>
-  );
-};
+  </div>
+);
