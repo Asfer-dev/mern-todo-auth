@@ -1,12 +1,10 @@
-version: "3.8"
-
 services:
   backend:
     build:
       context: ./server
     container_name: server
-    ports:
-      - "5000:5000"
+    # ports:
+    #   - "5000:5000"
     env_file:
       - ./server/.env
     networks:
@@ -16,8 +14,8 @@ services:
     build:
       context: ./client
     container_name: client
-    ports:
-      - "3000:80"
+    # ports:
+    #   - "3000:80"
     depends_on:
       - backend
     networks:

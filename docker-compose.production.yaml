@@ -1,0 +1,18 @@
+services:
+  backend:
+    container_name: server_production
+    env_file:
+      - ./server/.env.production
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "5000:5000"
+
+  frontend:
+    container_name: client_production
+    build:
+      context: ./client
+      args:
+        VITE_API_URL: http://localhost:5000/api
+    ports:
+      - "3000:80"

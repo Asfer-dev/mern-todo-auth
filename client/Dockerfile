@@ -11,6 +11,10 @@ RUN npm install
 # Copy the rest of the app
 COPY . .
 
+# Accept Vite environment variables (must be prefixed with VITE_)
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 # Build the Vite project
 RUN npm run build
 
