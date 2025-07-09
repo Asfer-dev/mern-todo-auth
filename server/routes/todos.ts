@@ -1,27 +1,30 @@
-const express = require("express");
-const Todo = require("../models/todo");
-const auth = require("../middleware/auth");
+import express, { Request, Response } from "express";
+import Todo from "../models/todo";
+import auth from "../middleware/auth";
+
 const router = express.Router();
 
+// Middleware
 router.use(auth);
 
-// GET /api/todos - Get all todos for user
-router.get("/", async (req, res) => {
+// GET /api/todos - Get all todos
+router.get("/", async (req: Request, res: Response) => {
   try {
-    const todos = await Todo.find({ userId: req.user.userId }).sort({
-      createdAt: -1,
-    });
+    const userId = (req as any).user.userId;
+
+    const todos = await Todo.find({ userId }).sort({ createdAt: -1 });
     res.json(todos);
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch todos" });
   }
 });
 
 // POST /api/todos - Create a new todo
-router.post("/", async (req, res) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
     const { text, dueDate, priority = "medium", tags = [] } = req.body;
+    const userId = (req as any).user.userId;
 
     if (!text) return res.status(400).json({ error: "Todo text required" });
 
@@ -31,19 +34,20 @@ router.post("/", async (req, res) => {
       priority,
       tags,
       completed: false,
-      userId: req.user.userId,
+      userId,
     });
 
     res.status(201).json(todo);
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: "Failed to create todo" });
   }
 });
 
-// PUT /api/todos/:id - Update a todo (any field)
-router.put("/:id", async (req, res) => {
+// PUT /api/todos/:id - Update a todo
+router.put("/:id", async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).user.userId;
     const update = { ...req.body };
 
     if (update.completed === true && !update.completedAt) {
@@ -53,26 +57,26 @@ router.put("/:id", async (req, res) => {
     }
 
     const todo = await Todo.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.userId },
+      { _id: req.params.id, userId },
       update,
       { new: true }
     );
 
     if (!todo) return res.status(404).json({ error: "Todo not found" });
     res.json(todo);
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: "Failed to update todo" });
   }
 });
 
-// PATCH /api/todos/:id/toggle - Toggle completed state
-router.patch("/:id/toggle", async (req, res) => {
+// PATCH /api/todos/:id/toggle - Toggle completion
+router.patch("/:id/toggle", async (req: Request, res: Response) => {
   try {
-    const todo = await Todo.findOne({
-      _id: req.params.id,
-      userId: req.user.userId,
-    });
+    const userId = (req as any).user.userId;
+
+    const todo = await Todo.findOne({ _id: req.params.id, userId });
+
     if (!todo) return res.status(404).json({ error: "Todo not found" });
 
     todo.completed = !todo.completed;
@@ -80,18 +84,24 @@ router.patch("/:id/toggle", async (req, res) => {
     await todo.save();
 
     res.json(todo);
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: "Failed to toggle todo" });
   }
 });
 
-// GET /api/todos/search - Search/filter todos
-router.get("/search", async (req, res) => {
+// GET /api/todos/search - Filter todos
+router.get("/search", async (req: Request, res: Response) => {
   try {
-    const { tag, priority, before, after } = req.query;
+    const userId = (req as any).user.userId;
+    const { tag, priority, before, after } = req.query as {
+      tag?: string;
+      priority?: string;
+      before?: string;
+      after?: string;
+    };
 
-    const filter = { userId: req.user.userId };
+    const filter: any = { userId };
 
     if (tag) filter.tags = tag;
     if (priority) filter.priority = priority;
@@ -101,34 +111,31 @@ router.get("/search", async (req, res) => {
 
     const todos = await Todo.find(filter).sort({ dueDate: 1 });
     res.json(todos);
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: "Failed to search todos" });
   }
 });
 
-// DELETE /api/todos/completed - Bulk delete completed todos
-router.delete("/completed", async (req, res) => {
+// DELETE /api/todos/completed - Bulk delete
+router.delete("/completed", async (req: Request, res: Response) => {
   try {
-    const result = await Todo.deleteMany({
-      userId: req.user.userId,
-      completed: true,
-    });
+    const userId = (req as any).user.userId;
 
+    const result = await Todo.deleteMany({ userId, completed: true });
     res.json({ deletedCount: result.deletedCount });
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: "Failed to delete completed todos" });
   }
 });
 
-// DELETE /api/todos/:id - Delete a single todo
-router.delete("/:id", async (req, res) => {
+// DELETE /api/todos/:id - Delete one
+router.delete("/:id", async (req: Request, res: Response) => {
   try {
-    const result = await Todo.deleteOne({
-      _id: req.params.id,
-      userId: req.user.userId,
-    });
+    const userId = (req as any).user.userId;
+
+    const result = await Todo.deleteOne({ _id: req.params.id, userId });
 
     if (result.deletedCount === 0) {
       return res
@@ -137,10 +144,10 @@ router.delete("/:id", async (req, res) => {
     }
 
     res.json({ message: "Todo deleted" });
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: "Failed to delete todo" });
   }
 });
 
-module.exports = router;
+export default router;
