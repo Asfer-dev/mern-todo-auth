@@ -1,0 +1,8 @@
+# nginx-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    # (paste your nginx.conf contents here with correct indentation)
