@@ -1,9 +1,9 @@
-import { useState, ChangeEvent, FormEvent } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import PrimaryButton from "../components/Button";
+import Input from "../components/Input";
 import { useAuth } from "../context/AuthContext";
 import { useApi } from "../hooks/useApi";
-import Input from "../components/Input";
-import PrimaryButton from "../components/Button";
 
 type FormData = {
   email: string;
@@ -73,6 +73,11 @@ const LoginPage = () => {
             Welcome Back to To-Do App
           </h1>
           <p className="text-gray-500">Sign in to your account</p>
+          <div className="bg-amber-100 rounded-lg p-2 mt-2">
+            <p className="text-yellow-700">Test Account</p>
+            <p className="text-yellow-700">email: test@gmail.com</p>
+            <p className="text-yellow-700">password: test123</p>
+          </div>
         </div>
 
         <div className="space-y-6">
