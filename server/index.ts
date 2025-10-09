@@ -1,7 +1,7 @@
-import express, { Application } from "express";
-import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import express, { Application } from "express";
+import mongoose from "mongoose";
 
 // Import route modules (assume they are converted to TypeScript too)
 import authRoutes from "./routes/auth";
@@ -20,7 +20,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
 
 // MongoDB connection
-const PORT = process.env.PORT || 5000;
+const PORT: number = parseInt(process.env.PORT ?? "5000", 10);
 const MONGO_URI = process.env.MONGO_URI || "";
 
 if (!MONGO_URI) {
@@ -31,7 +31,7 @@ if (!MONGO_URI) {
 mongoose
   .connect(MONGO_URI)
   .then(() => {
-    app.listen(PORT, () => {
+    app.listen(PORT, "0.0.0.0", () => {
       console.log(`Server running on port ${PORT}`);
     });
   })
