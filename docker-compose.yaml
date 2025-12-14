@@ -1,8 +1,10 @@
 services:
   # -------------------------
   # PART I (DEPLOYMENT STACK)
+  # Run with: docker compose --profile prod up -d --build
   # -------------------------
   mongo:
+    profiles: ["prod"]
     image: mongo:6
     container_name: mongo
     restart: unless-stopped
@@ -12,6 +14,7 @@ services:
       - mern-net
 
   backend:
+    profiles: ["prod"]
     build:
       context: ./server
     container_name: backend
@@ -28,6 +31,7 @@ services:
       - "5000:5000"
 
   frontend:
+    profiles: ["prod"]
     build:
       context: ./client
       args:
@@ -43,8 +47,7 @@ services:
 
   # -------------------------
   # PART II (JENKINS CI BUILD)
-  # - code mounted as volume
-  # - different names/ports
+  # Run with: docker compose --profile ci up --abort-on-container-exit
   # -------------------------
   mongo_ci:
     profiles: ["ci"]
