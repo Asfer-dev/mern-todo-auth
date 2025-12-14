@@ -10,23 +10,8 @@ services:
       - mongo_data:/data/db
     networks:
       - mern-net
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mongosh",
-          "--quiet",
-          "mongodb://localhost:27017/test",
-          "--eval",
-          "db.runCommand({ping:1}).ok",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
   backend:
-    # Put your DockerHub repo name here (required for pushing)
-    image: YOUR_DOCKERHUB_USERNAME/mern-backend:latest
     build:
       context: ./server
     container_name: backend
@@ -35,18 +20,14 @@ services:
       - ./server/.env.production
     environment:
       - NODE_ENV=production
-      # If your app reads MONGO_URI, this is the correct container URL:
-      - MONGO_URI=mongodb://mongo:27017/mern_db
     depends_on:
-      mongo:
-        condition: service_healthy
+      - mongo
     networks:
       - mern-net
     ports:
-      - "5000:5000" # optional for direct API access/testing
+      - "5000:5000"
 
   frontend:
-    image: YOUR_DOCKERHUB_USERNAME/mern-frontend:latest
     build:
       context: ./client
       args:
@@ -62,9 +43,8 @@ services:
 
   # -------------------------
   # PART II (JENKINS CI BUILD)
-  # - uses volumes for code
+  # - code mounted as volume
   # - different names/ports
-  # - no Dockerfile build
   # -------------------------
   mongo_ci:
     profiles: ["ci"]
@@ -75,19 +55,6 @@ services:
       - mongo_ci_data:/data/db
     networks:
       - mern-net-ci
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mongosh",
-          "--quiet",
-          "mongodb://localhost:27017/test",
-          "--eval",
-          "db.runCommand({ping:1}).ok",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
   backend_ci:
     profiles: ["ci"]
@@ -99,12 +66,11 @@ services:
     environment:
       - NODE_ENV=test
       - MONGO_URI=mongodb://mongo_ci:27017/mern_test
+      - JWT_SECRET=dummy_for_ci_only
     depends_on:
-      mongo_ci:
-        condition: service_healthy
+      - mongo_ci
     networks:
       - mern-net-ci
-    # different port mapping (requirement), even though build exits
     ports:
       - "5100:5000"
     command: sh -c "npm ci && npm run build && npm test --if-present"
