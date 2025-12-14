@@ -1,8 +1,8 @@
-import express, { Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import express, { Request, Response } from "express";
 import rateLimit from "express-rate-limit";
-import User from "../models/user"; // assumes user model is converted to TS
+import jwt from "jsonwebtoken";
+import User from "../models/user.js"; // assumes user model is converted to TS
 
 const router = express.Router();
 

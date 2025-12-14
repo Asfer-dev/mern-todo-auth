@@ -7,8 +7,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 // Routes
-import authRoutes from "./routes/auth";
-import todoRoutes from "./routes/todos";
+import authRoutes from "./routes/auth.js";
+import todoRoutes from "./routes/todos.js";
 
 dotenv.config();
 
