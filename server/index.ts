@@ -35,7 +35,7 @@ const hasBuiltClient = fs.existsSync(path.join(clientDist, "index.html"));
 if (isProd || hasBuiltClient) {
   app.use(express.static(clientDist));
   // SPA fallback (but don't swallow API)
-  app.get("*", (req, res, next) => {
+  app.get("/*splat", (req, res, next) => {
     if (req.path.startsWith("/api/")) return next();
     res.sendFile(path.join(clientDist, "index.html"));
   });

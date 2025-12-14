@@ -4,19 +4,56 @@ import Todo from "../models/todo.js";
 
 const router = express.Router();
 
-// Middleware
 router.use(auth);
 
 // GET /api/todos - Get all todos
 router.get("/", async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.userId;
-
     const todos = await Todo.find({ userId }).sort({ createdAt: -1 });
     res.json(todos);
   } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch todos" });
+  }
+});
+
+// ✅ MOVE THIS UP: GET /api/todos/search
+router.get("/search", async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { tag, priority, before, after } = req.query as {
+      tag?: string;
+      priority?: string;
+      before?: string;
+      after?: string;
+    };
+
+    const filter: any = { userId };
+
+    if (tag) filter.tags = tag;
+    if (priority) filter.priority = priority;
+    if (before || after) filter.dueDate = {};
+    if (before) filter.dueDate.$lte = new Date(before);
+    if (after) filter.dueDate.$gte = new Date(after);
+
+    const todos = await Todo.find(filter).sort({ dueDate: 1 });
+    res.json(todos);
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to search todos" });
+  }
+});
+
+// ✅ MOVE THIS UP: DELETE /api/todos/completed
+router.delete("/completed", async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const result = await Todo.deleteMany({ userId, completed: true });
+    res.json({ deletedCount: result.deletedCount });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete completed todos" });
   }
 });
 
@@ -76,7 +113,6 @@ router.patch("/:id/toggle", async (req: Request, res: Response) => {
     const userId = (req as any).user.userId;
 
     const todo = await Todo.findOne({ _id: req.params.id, userId });
-
     if (!todo) return res.status(404).json({ error: "Todo not found" });
 
     todo.completed = !todo.completed;
@@ -87,46 +123,6 @@ router.patch("/:id/toggle", async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: "Failed to toggle todo" });
-  }
-});
-
-// GET /api/todos/search - Filter todos
-router.get("/search", async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user.userId;
-    const { tag, priority, before, after } = req.query as {
-      tag?: string;
-      priority?: string;
-      before?: string;
-      after?: string;
-    };
-
-    const filter: any = { userId };
-
-    if (tag) filter.tags = tag;
-    if (priority) filter.priority = priority;
-    if (before || after) filter.dueDate = {};
-    if (before) filter.dueDate.$lte = new Date(before);
-    if (after) filter.dueDate.$gte = new Date(after);
-
-    const todos = await Todo.find(filter).sort({ dueDate: 1 });
-    res.json(todos);
-  } catch (err: any) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to search todos" });
-  }
-});
-
-// DELETE /api/todos/completed - Bulk delete
-router.delete("/completed", async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user.userId;
-
-    const result = await Todo.deleteMany({ userId, completed: true });
-    res.json({ deletedCount: result.deletedCount });
-  } catch (err: any) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to delete completed todos" });
   }
 });
 
