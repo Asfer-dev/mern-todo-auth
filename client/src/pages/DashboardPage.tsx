@@ -1,34 +1,26 @@
+import { LogOut, Plus, Search } from "lucide-react";
 import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
   ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
 } from "react";
+import PrimaryButton from "../components/Button";
+import Modal from "../components/Modal";
+import TodoCard from "../components/TodoCard";
+import TodoForm, { TodoFormData } from "../components/TodoForm";
 import { useAuth } from "../context/AuthContext";
 import { useApi } from "../hooks/useApi";
-import TodoCard from "../components/TodoCard";
-import TodoForm from "../components/TodoForm";
-import Modal from "../components/Modal";
-import { LogOut, Plus, Search } from "lucide-react";
-import PrimaryButton from "../components/Button";
 
 type Todo = {
   _id: string;
   text: string;
   completed: boolean;
-  priority: string;
+  priority: "high" | "medium" | "low";
   tags?: string[];
   dueDate?: string;
   // Add any other fields returned from your backend
-};
-
-type TodoFormData = {
-  text: string;
-  priority: string;
-  dueDate?: string;
-  tags?: string[];
-  completed?: boolean;
 };
 
 const Dashboard = () => {
@@ -182,6 +174,7 @@ const Dashboard = () => {
             </div>
           </div>
           <button
+            data-testid="logout-btn"
             onClick={logout}
             className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
           >
@@ -197,6 +190,7 @@ const Dashboard = () => {
               size={18}
             />
             <input
+              data-testid="search-input"
               type="text"
               placeholder="Search notes..."
               value={searchTerm}
@@ -207,6 +201,7 @@ const Dashboard = () => {
             />
           </div>
           <select
+            data-testid="priority-filter"
             value={filterPriority}
             onChange={(e: ChangeEvent<HTMLSelectElement>) =>
               setFilterPriority(e.target.value)
@@ -231,6 +226,7 @@ const Dashboard = () => {
             </button>
           )}
           <PrimaryButton
+            data-testid="new-note-btn"
             onClick={() => openModal()}
             className="flex items-center space-x-2 px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-lg transition-colors shadow-sm hover:shadow-md font-medium"
           >

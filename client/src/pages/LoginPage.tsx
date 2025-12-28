@@ -94,6 +94,7 @@ const LoginPage = () => {
               placeholder="Enter your email"
               error={errors.email}
               disabled={loading}
+              data-testid="login-email"
             />
           </div>
 
@@ -110,6 +111,7 @@ const LoginPage = () => {
               placeholder="Enter your password"
               error={errors.password}
               disabled={loading}
+              data-testid="login-password"
             />
           </div>
 
@@ -121,7 +123,12 @@ const LoginPage = () => {
           )}
 
           {/* Submit Button */}
-          <PrimaryButton type="submit" disabled={loading} className="w-full">
+          <PrimaryButton
+            type="submit"
+            disabled={loading}
+            className="w-full"
+            data-testid="login-submit"
+          >
             {loading ? "Please wait..." : "Sign In"}
           </PrimaryButton>
         </div>
@@ -131,8 +138,8 @@ const LoginPage = () => {
           <button
             type="button"
             onClick={() => navigate("/register")}
-            className="text-gray-600 hover:text-gray-800 font-medium transition-colors"
             disabled={loading}
+            data-testid="go-register"
           >
             {"Don't have an account? "}
             <span className="text-yellow-600 hover:text-yellow-700">

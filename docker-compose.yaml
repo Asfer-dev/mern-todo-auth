@@ -91,10 +91,84 @@ services:
       - "3100:3000"
     command: sh -c "npm ci && npm run build"
 
+  # -------------------------
+  # PART III (E2E TESTING)
+  # Run with: docker compose --profile e2e up --abort-on-container-exit
+  # -------------------------
+  mongo_e2e:
+    profiles: ["e2e"]
+    image: mongo:6
+    container_name: mongo_e2e
+    restart: unless-stopped
+    networks:
+      - mern-net-e2e
+
+  backend_e2e:
+    profiles: ["e2e"]
+    build:
+      context: ./server
+    container_name: backend_e2e
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://mongo_e2e:27017/mern_e2e
+      - JWT_SECRET=test_secret_for_e2e_only
+      - PORT=5000
+    depends_on:
+      - mongo_e2e
+    networks:
+      - mern-net-e2e
+    ports:
+      - "5200:5000"
+
+  frontend_e2e:
+    profiles: ["e2e"]
+    build:
+      context: ./client
+      args:
+        VITE_API_URL: /api
+    container_name: frontend_e2e
+    restart: unless-stopped
+    depends_on:
+      - backend_e2e
+    networks:
+      - mern-net-e2e
+    ports:
+      - "8080:80"
+
+  selenium:
+    profiles: ["e2e"]
+    image: selenium/standalone-chrome:latest
+    container_name: selenium
+    restart: unless-stopped
+    shm_size: 2gb
+    networks:
+      - mern-net-e2e
+    ports:
+      - "4444:4444"
+      - "7900:7900"
+
+  e2e-tests:
+    profiles: ["e2e"]
+    build:
+      context: ./tests/e2e
+    container_name: e2e-tests
+    environment:
+      - APP_URL=http://frontend_e2e
+      - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
+    depends_on:
+      - frontend_e2e
+      - backend_e2e
+      - selenium
+    networks:
+      - mern-net-e2e
+
 networks:
   mern-net:
     driver: bridge
   mern-net-ci:
+    driver: bridge
+  mern-net-e2e:
     driver: bridge
 
 volumes:

@@ -1,6 +1,6 @@
-import { useState, ChangeEvent, FormEvent } from "react";
-import Input from "./Input";
+import { ChangeEvent, FormEvent, useState } from "react";
 import PrimaryButton from "./Button";
+import Input from "./Input";
 
 export type TodoFormData = {
   text: string;
@@ -54,6 +54,7 @@ const TodoForm = ({ todo, onSubmit, onCancel }: TodoFormProps) => {
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-600">Task</label>
         <Input
+          data-testid="todo-text"
           type="text"
           value={formData.text}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -112,7 +113,7 @@ const TodoForm = ({ todo, onSubmit, onCancel }: TodoFormProps) => {
 
       {/* Action Buttons */}
       <div className="flex space-x-3 pt-2">
-        <PrimaryButton type="submit" className="w-full">
+        <PrimaryButton data-testid="todo-save" type="submit" className="w-full">
           {todo ? "Update" : "Create"} Task
         </PrimaryButton>
         <button
