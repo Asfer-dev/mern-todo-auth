@@ -26,7 +26,8 @@ echo -e "${GREEN}✓ All prerequisites satisfied${NC}"
 echo -e "\n${BLUE}Step 2: Ensuring Minikube is running...${NC}"
 if ! minikube status | grep -q "Running"; then
     echo "Starting Minikube..."
-    minikube start --cpus=4 --memory=4096 --driver=docker
+    # Let Minikube automatically allocate resources based on system availability
+    minikube start --driver=docker
 else
     echo -e "${GREEN}✓ Minikube is already running${NC}"
 fi

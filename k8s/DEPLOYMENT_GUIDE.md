@@ -57,8 +57,14 @@ ngrok config add-authtoken YOUR_NGROK_AUTHTOKEN
 ### 3. Start Minikube
 
 ```bash
-# Start minikube with enough resources
+# Option 1: Recommended (if you have 4+ CPU cores and 4GB+ RAM)
 minikube start --cpus=4 --memory=4096 --driver=docker
+
+# Option 2: Minimum (if you have 2 CPU cores and 2GB RAM)
+minikube start --cpus=2 --memory=2048 --driver=docker
+
+# Option 3: Let minikube decide (uses available resources)
+minikube start --driver=docker
 
 # Enable metrics server (required for HPA)
 minikube addons enable metrics-server
